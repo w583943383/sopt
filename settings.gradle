@@ -1,0 +1,5 @@
+include ':sopt'
+include ':app'
+include ':fix-crash'
+include ':framework-api'
+rootProject.name = "SOpt"

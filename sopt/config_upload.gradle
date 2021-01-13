@@ -1,0 +1,133 @@
+/*
+ * Copyright 2019 Jesse.lu
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+def isReleaseBuild() {
+    return LIB_VERSION_NAME.contains("SNAPSHOT") == false
+}
+
+static def getReleaseRepositoryUrl() {
+    return "http://t-mvn-android.crgt.xyz/repository/maven-releases/"
+}
+
+static def getSnapshotRepositoryUrl() {
+    return "http://t-mvn-android.crgt.xyz/repository/maven-snapshots/"
+}
+
+static def getRepositoryUsername() {
+    return "uploader"
+}
+
+static def getRepositoryPassword() {
+    return "crgtmaven"
+}
+
+def hasAndroidPlugin() {
+    return getPlugins().inject(false) { a, b ->
+        def classStr = b.getClass().name
+        def isAndroid = ("com.android.build.gradle.LibraryPlugin" == classStr) || ("com.android.build.gradle.AppPlugin" == classStr)
+        a || isAndroid
+    }
+}
+
+afterEvaluate { project ->
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                pom.groupId = 'com.crgt.android'
+                pom.artifactId = POM_ARTIFACT_ID
+                pom.version = LIB_VERSION_NAME
+
+                repository(url: getReleaseRepositoryUrl()) {
+                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+                }
+                snapshotRepository(url: getSnapshotRepositoryUrl()) {
+                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+                }
+
+                pom.project {
+                    name 'com.crgt.android'
+                    packaging 'aar'
+                    description "Lib For Android"
+                    url 'http://t-mvn-android.crgt.xyz/repository/maven-public/'
+
+                    licenses {
+                        license {
+                            name "The Apache Software License, Version 2.0"
+                            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                            comments "A business - friendly OSS license"
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id "android_team"
+                            name "android_team"
+                            email "android@crgecent.com"
+                            url "http://www.crgecent.com/"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    signing {
+        required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
+        sign configurations.archives
+    }
+
+
+    task androidJavadocs(type: Javadoc) {
+        failOnError false
+        if (hasAndroidPlugin()) {
+            source = android.sourceSets.main.java.srcDirs
+            classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+        } else {
+            source = sourceSets.main.allSource
+        }
+
+        options {
+            links "http://docs.oracle.com/javase/7/docs/api/"
+        }
+    }
+
+    // 配置发布javadoc
+    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+        classifier = 'javadoc'
+        from androidJavadocs.destinationDir
+    }
+
+    // 配置发布源码包
+    task androidSourcesJar(type: Jar) {
+        classifier = 'sources'
+        if (hasAndroidPlugin()) {
+            from android.sourceSets.main.java.srcDirs
+        } else {
+            from sourceSets.main.allSource
+        }
+    }
+
+    artifacts {
+        archives androidSourcesJar
+        archives androidJavadocsJar
+    }
+
+
+}

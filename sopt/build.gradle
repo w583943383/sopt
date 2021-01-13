@@ -1,0 +1,20 @@
+apply plugin: 'groovy'
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+apply from: "config_upload.gradle"
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation gradleApi()
+    // 引入 Transform 相关API
+    implementation "com.android.tools.build:gradle:3.5.4"
+    implementation 'org.ow2.asm:asm:7.1'
+    implementation 'org.ow2.asm:asm-util:7.1'
+    implementation 'org.ow2.asm:asm-commons:7.1'
+    // Javassist
+    implementation 'org.javassist:javassist:3.21.0-GA'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
