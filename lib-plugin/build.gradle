@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'org.ow2.asm:asm:5.0.3'
+    implementation 'com.android.tools.build:gradle:3.5.4'
+    implementation project(':lib-annotation')
+}

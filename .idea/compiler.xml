@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel>
+    <bytecodeTargetLevel target="1.7">
       <module name="lib-gplugin" target="1.7" />
       <module name="sopt" target="1.7" />
+      <module name="SOpt.app" target="1.8" />
+      <module name="SOpt.fix-crash" target="1.8" />
+      <module name="SOpt.framework-api" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

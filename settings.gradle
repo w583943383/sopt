@@ -1,3 +1,5 @@
+include ':lib-annotation'
+include ':lib-plugin'
 include ':sopt'
 include ':app'
 include ':fix-crash'
